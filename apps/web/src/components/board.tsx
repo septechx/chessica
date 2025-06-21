@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { Button } from "./ui/button";
 
 type PieceType =
   | "rook"
@@ -112,6 +111,186 @@ function Board() {
         }
         board.set((x - 1) * 10 + y, { piece: "dot", color: "dot" });
         break;
+      case "rook": {
+        // Up
+        for (let i = x - 1; i >= 0; i--) {
+          const target = board.get(i * 10 + y);
+          if (target === null) {
+            board.set(i * 10 + y, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        // Down
+        for (let i = x + 1; i < 8; i++) {
+          const target = board.get(i * 10 + y);
+          if (target === null) {
+            board.set(i * 10 + y, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        // Left
+        for (let j = y - 1; j >= 0; j--) {
+          const target = board.get(x * 10 + j);
+          if (target === null) {
+            board.set(x * 10 + j, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        // Right
+        for (let j = y + 1; j < 8; j++) {
+          const target = board.get(x * 10 + j);
+          if (target === null) {
+            board.set(x * 10 + j, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        break;
+      }
+      case "bishop": {
+        // Diagonals
+        for (let d = 1; x - d >= 0 && y - d >= 0; d++) {
+          const target = board.get((x - d) * 10 + (y - d));
+          if (target === null) {
+            board.set((x - d) * 10 + (y - d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x - d >= 0 && y + d < 8; d++) {
+          const target = board.get((x - d) * 10 + (y + d));
+          if (target === null) {
+            board.set((x - d) * 10 + (y + d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x + d < 8 && y - d >= 0; d++) {
+          const target = board.get((x + d) * 10 + (y - d));
+          if (target === null) {
+            board.set((x + d) * 10 + (y - d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x + d < 8 && y + d < 8; d++) {
+          const target = board.get((x + d) * 10 + (y + d));
+          if (target === null) {
+            board.set((x + d) * 10 + (y + d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        break;
+      }
+      case "queen": {
+        // Queen = rook + bishop
+        // Rook moves
+        for (let i = x - 1; i >= 0; i--) {
+          const target = board.get(i * 10 + y);
+          if (target === null) {
+            board.set(i * 10 + y, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let i = x + 1; i < 8; i++) {
+          const target = board.get(i * 10 + y);
+          if (target === null) {
+            board.set(i * 10 + y, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let j = y - 1; j >= 0; j--) {
+          const target = board.get(x * 10 + j);
+          if (target === null) {
+            board.set(x * 10 + j, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let j = y + 1; j < 8; j++) {
+          const target = board.get(x * 10 + j);
+          if (target === null) {
+            board.set(x * 10 + j, { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        // Bishop moves
+        for (let d = 1; x - d >= 0 && y - d >= 0; d++) {
+          const target = board.get((x - d) * 10 + (y - d));
+          if (target === null) {
+            board.set((x - d) * 10 + (y - d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x - d >= 0 && y + d < 8; d++) {
+          const target = board.get((x - d) * 10 + (y + d));
+          if (target === null) {
+            board.set((x - d) * 10 + (y + d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x + d < 8 && y - d >= 0; d++) {
+          const target = board.get((x + d) * 10 + (y - d));
+          if (target === null) {
+            board.set((x + d) * 10 + (y - d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        for (let d = 1; x + d < 8 && y + d < 8; d++) {
+          const target = board.get((x + d) * 10 + (y + d));
+          if (target === null) {
+            board.set((x + d) * 10 + (y + d), { piece: "dot", color: "dot" });
+          } else {
+            break;
+          }
+        }
+        break;
+      }
+      case "king": {
+        const kingMoves = [
+          [-1, -1], [-1, 0], [-1, 1],
+          [0, -1], [0, 1],
+          [1, -1], [1, 0], [1, 1],
+        ];
+        for (const [dx, dy] of kingMoves) {
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
+            const target = board.get(nx * 10 + ny);
+            if (target === null) {
+              board.set(nx * 10 + ny, { piece: "dot", color: "dot" });
+            }
+          }
+        }
+        break;
+      }
+      case "knight": {
+        const knightMoves = [
+          [-2, -1], [-2, 1],
+          [-1, -2], [-1, 2],
+          [1, -2], [1, 2],
+          [2, -1], [2, 1],
+        ];
+        for (const [dx, dy] of knightMoves) {
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
+            const target = board.get(nx * 10 + ny);
+            if (target === null) {
+              board.set(nx * 10 + ny, { piece: "dot", color: "dot" });
+            }
+          }
+        }
+        break;
+      }
       default:
         return;
     }
