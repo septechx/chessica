@@ -1,46 +1,63 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { Button } from "./ui/button";
+import type { PieceType, Color, Piece } from "@chessica/protocol/types";
 
-type PieceType =
-  | "rook"
-  | "knight"
-  | "bishop"
-  | "king"
-  | "queen"
-  | "pawn"
-  | "dot";
-type Color = "white" | "black" | "dot";
-
-type Piece = {
-  color: Color;
-  piece: PieceType;
-};
 type BoardMap = Map<number, Piece | null>;
 
-function createInitialBoard(): BoardMap {
+function createInitialBoard(playerColor: Color): BoardMap {
   const board: BoardMap = new Map();
 
-  const backRank: PieceType[] = [
-    "rook",
-    "knight",
-    "bishop",
-    "queen",
-    "king",
-    "bishop",
-    "knight",
-    "rook",
-  ];
-
-  for (let col = 0; col < 8; col++) {
-    board.set(col, { color: "white", piece: backRank[col] });
-    board.set(10 + col, { color: "white", piece: "pawn" });
+  let backRank: PieceType[];
+  if (playerColor === "white") {
+    backRank = [
+      "rook",
+      "knight",
+      "bishop",
+      "queen",
+      "king",
+      "bishop",
+      "knight",
+      "rook",
+    ];
+  } else {
+    backRank = [
+      "rook",
+      "knight",
+      "bishop",
+      "king",
+      "queen",
+      "bishop",
+      "knight",
+      "rook",
+    ];
   }
 
-  for (let col = 0; col < 8; col++) {
-    board.set(60 + col, { color: "black", piece: "pawn" });
-    board.set(70 + col, { color: "black", piece: backRank[col] });
+  let whiteRows, blackRows;
+  if (playerColor === "white") {
+    whiteRows = [7, 6];
+    blackRows = [0, 1];
+  } else {
+    whiteRows = [0, 1];
+    blackRows = [7, 6];
   }
 
-  for (let row = 2; row <= 5; row++) {
+  // Place white pieces
+  for (let col = 0; col < 8; col++) {
+    board.set(whiteRows[0] * 10 + col, { color: "white", piece: backRank[col] });
+    board.set(whiteRows[1] * 10 + col, { color: "white", piece: "pawn" });
+  }
+
+  // Place black pieces
+  for (let col = 0; col < 8; col++) {
+    board.set(blackRows[1] * 10 + col, { color: "black", piece: "pawn" });
+    board.set(blackRows[0] * 10 + col, { color: "black", piece: backRank[col] });
+  }
+
+  // Fill empty squares
+  const emptyRows = Array.from({ length: 8 }, (_, i) => i).filter(
+    (row) => !whiteRows.includes(row) && !blackRows.includes(row)
+  );
+  for (const row of emptyRows) {
     for (let col = 0; col < 8; col++) {
       board.set(row * 10 + col, null);
     }
@@ -58,11 +75,19 @@ function fetchPiece(piece: Piece): string {
 }
 
 function Board() {
-  const player_color = "black";
-
+  const [playerColor, setPlayerColor] = useState<Color>("white");
   const [isMoving, setIsMoving] = useState<number>(-1);
   const [, setStep] = useState<number>(0);
-  const board = useRef<BoardMap>(createInitialBoard()).current;
+  const board = useRef<BoardMap>(createInitialBoard("white")).current;
+
+  // Reset board when playerColor changes
+  useEffect(() => {
+    const newBoard = createInitialBoard(playerColor);
+    board.clear();
+    newBoard.forEach((v, k) => board.set(k, v));
+    setIsMoving(-1);
+    render();
+  }, [playerColor]);
 
   function render() {
     setStep((p) => p + 1);
@@ -87,7 +112,7 @@ function Board() {
       return;
     }
 
-    if (piece.color !== player_color) return;
+    if (piece.color !== playerColor) return;
     if (isMoving !== -1) {
       if (isMoving !== x * 10 + y) {
         return;
@@ -258,12 +283,18 @@ function Board() {
       }
       case "king": {
         const kingMoves = [
-          [-1, -1], [-1, 0], [-1, 1],
-          [0, -1], [0, 1],
-          [1, -1], [1, 0], [1, 1],
+          [-1, -1],
+          [-1, 0],
+          [-1, 1],
+          [0, -1],
+          [0, 1],
+          [1, -1],
+          [1, 0],
+          [1, 1],
         ];
         for (const [dx, dy] of kingMoves) {
-          const nx = x + dx, ny = y + dy;
+          const nx = x + dx,
+            ny = y + dy;
           if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
             const target = board.get(nx * 10 + ny);
             if (target === null) {
@@ -275,13 +306,18 @@ function Board() {
       }
       case "knight": {
         const knightMoves = [
-          [-2, -1], [-2, 1],
-          [-1, -2], [-1, 2],
-          [1, -2], [1, 2],
-          [2, -1], [2, 1],
+          [-2, -1],
+          [-2, 1],
+          [-1, -2],
+          [-1, 2],
+          [1, -2],
+          [1, 2],
+          [2, -1],
+          [2, 1],
         ];
         for (const [dx, dy] of knightMoves) {
-          const nx = x + dx, ny = y + dy;
+          const nx = x + dx,
+            ny = y + dy;
           if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
             const target = board.get(nx * 10 + ny);
             if (target === null) {
@@ -299,31 +335,43 @@ function Board() {
   }
 
   return (
-    <div className="flex flex-row max-w-160 border-2">
-      {Array.from({ length: 8 }, (_, i) => (
-        <div className="flex flex-col" key={i}>
-          {Array.from({ length: 8 }, (__, j) => (
-            <div
-              className="w-20 h-20 border-2 flex justify-center items-center"
-              key={j}
-            >
-              {board.get(j * 10 + i) === null ? (
-                <div></div>
-              ) : (
-                <div onClick={() => startMove(j, i)}>
-                  <img
-                    alt={`${board.get(j * 10 + i)?.color} ${board.get(j * 10 + i)?.piece}`}
-                    src={fetchPiece(board.get(j * 10 + i)!)}
-                    height={board.get(j * 10 + i)!.color === "dot" ? 32 : 64}
-                    width={board.get(j * 10 + i)!.color === "dot" ? 32 : 64}
-                  //draggable={false}
-                  />
+    <div>
+      <Button
+        variant="secondary"
+        className="mb-4"
+        onClick={() => setPlayerColor(playerColor === "white" ? "black" : "white")}
+      >
+        Play as {playerColor === "white" ? "Black" : "White"}
+      </Button>
+      <div className="flex flex-row max-w-160 border-2">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div className="flex flex-col" key={i}>
+            {Array.from({ length: 8 }, (__, j) => {
+              const isLight = (i + j) % 2 === 0;
+              const squareBg = isLight ? "bg-gray-300" : "bg-gray-400";
+              return (
+                <div
+                  className={`w-20 h-20 border-2 flex justify-center items-center ${squareBg}`}
+                  key={j}
+                >
+                  {board.get(j * 10 + i) === null ? (
+                    <div></div>
+                  ) : (
+                    <div onClick={() => startMove(j, i)}>
+                      <img
+                        alt={`${board.get(j * 10 + i)?.color} ${board.get(j * 10 + i)?.piece}`}
+                        src={fetchPiece(board.get(j * 10 + i)!)}
+                        height={board.get(j * 10 + i)!.color === "dot" ? 32 : 64}
+                        width={board.get(j * 10 + i)!.color === "dot" ? 32 : 64}
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
