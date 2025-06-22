@@ -5,7 +5,7 @@ edition = "2021"
 license = "MIT"
 
 [lib]
-path = "lib.rs"
+path = "rust/lib.rs"
 crate-type = ["rlib"]
 
 [dependencies]

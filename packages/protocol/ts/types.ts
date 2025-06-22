@@ -1,6 +1,6 @@
 // Chess piece types
-export type PieceType = "rook" | "knight" | "bishop" | "king" | "queen" | "pawn";
-export type Color = "white" | "black";
+export type PieceType = "Rook" | "Knight" | "Bishop" | "King" | "Queen" | "Pawn";
+export type Color = "White" | "Black";
 
 export interface Piece {
     color: Color;
@@ -24,11 +24,14 @@ export interface GameState {
 
 // WebSocket protocol messages
 export type ClientMessage =
-    | { type: "make_move"; move: Move }
-    | { type: "join_game"; gameId: string }
-    | { type: "resign" };
+    | { type: "MakeMove"; move_: Move }
+    | { type: "JoinGame"; game_id: string }
+    | { type: "Resign" };
 
 export type ServerMessage =
-    | { type: "game_state"; state: GameState }
-    | { type: "move_made"; move: Move }
-    | { type: "error"; message: string }; 
+    | { type: "GameState"; state: GameState }
+    | { type: "MoveMade"; move_: Move }
+    | { type: "Error"; message: string }
+    | { type: "ColorAssigned"; color: Color }
+    | { type: "GameStarted" }
+    | { type: "WaitingForPlayers"; connected_count: number }; 

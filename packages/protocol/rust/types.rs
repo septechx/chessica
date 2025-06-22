@@ -1,4 +1,3 @@
-// Chess piece types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum PieceType {
     Rook,
@@ -21,7 +20,7 @@ pub struct Piece {
     pub piece: PieceType,
 }
 
-pub type Square = u8; // 0-63 for 8x8 board
+pub type Square = u8;
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Move {
@@ -35,7 +34,6 @@ pub struct GameState {
     pub board: Vec<Option<Piece>>,
     pub turn: Color,
     pub move_history: Vec<Move>,
-    // Add more fields as needed
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -52,4 +50,7 @@ pub enum ServerMessage {
     GameState { state: GameState },
     MoveMade { move_: Move },
     Error { message: String },
+    ColorAssigned { color: Color },
+    GameStarted,
+    WaitingForPlayers { connected_count: u8 },
 }

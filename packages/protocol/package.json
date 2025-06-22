@@ -1,0 +1,11 @@
+{
+    "name": "@chessica/protocol",
+    "version": "1.0.0",
+    "main": "./ts/types.ts",
+    "types": "./ts/types.ts",
+    "exports": {
+        ".": "./ts/types.ts",
+        "./types": "./ts/types.ts"
+    },
+    "license": "MIT"
+}

@@ -1,0 +1,8 @@
+{
+    "name": "@chessica/server",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "cargo run"
+    },
+    "license": "MIT"
+}
