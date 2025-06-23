@@ -1,6 +1,6 @@
 import type { Color } from "@chessica/protocol";
 
-export function switch_color(color: Color) {
+export function switchColor(color: Color) {
   let link: HTMLLinkElement | null =
     document.querySelector("link[rel~='icon']");
   if (!link) {

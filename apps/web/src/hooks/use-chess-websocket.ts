@@ -6,6 +6,7 @@ import type {
   ServerMessage,
   Move,
 } from "@chessica/protocol";
+import { useUserId } from "./use-userid";
 
 interface UseChessWebSocketReturn {
   connected: boolean;
@@ -17,7 +18,7 @@ interface UseChessWebSocketReturn {
   sendMove: (move: Move) => void;
 }
 
-export function useChessWebSocket(): UseChessWebSocketReturn {
+export function useChessWebSocket(gameId: string): UseChessWebSocketReturn {
   const [assignedColor, setAssignedColor] = useState<Color | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
@@ -25,6 +26,8 @@ export function useChessWebSocket(): UseChessWebSocketReturn {
   const [gameStarted, setGameStarted] = useState(false);
   const [waitingForPlayers, setWaitingForPlayers] = useState(false);
   const [connectedCount, setConnectedCount] = useState(0);
+
+  const { userId } = useUserId();
 
   const sendMove = useCallback(
     (move: Move) => {
@@ -40,14 +43,23 @@ export function useChessWebSocket(): UseChessWebSocketReturn {
   );
 
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:3000/ws");
+    const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+    const wsUrl = serverUrl.replace(/^http/, "ws") + "/ws";
+    const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
       console.log("Connected to game server");
       setConnected(true);
+
+      const identifyMessage: ClientMessage = {
+        type: "Identify",
+        id: userId,
+      };
+      websocket.send(JSON.stringify(identifyMessage));
+
       const joinMessage: ClientMessage = {
         type: "JoinGame",
-        game_id: "default",
+        game_id: gameId,
       };
       websocket.send(JSON.stringify(joinMessage));
     };
@@ -105,7 +117,7 @@ export function useChessWebSocket(): UseChessWebSocketReturn {
     return () => {
       websocket.close();
     };
-  }, []);
+  }, [gameId, userId]);
 
   return {
     connected,

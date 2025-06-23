@@ -1,5 +1,6 @@
 import type { Color } from "@chessica/protocol";
 import { fetchPiece, type UIPiece } from "@/lib/board-utils";
+import { cn } from "@/lib/utils";
 
 interface ChessSquareProps {
   rank: number;
@@ -17,11 +18,12 @@ export function ChessSquare({
   isLight,
   onClick,
 }: ChessSquareProps) {
-  const squareBg = isLight ? "bg-gray-300" : "bg-gray-400";
-
   return (
     <div
-      className={`w-20 h-20 border-2 border-background flex justify-center items-center ${squareBg} relative`}
+      className={cn(
+        "w-20 h-20 border-2 border-background flex justify-center items-center relative bg-gray-400",
+        { "bg-gray-300": isLight },
+      )}
       onClick={() => onClick(rank, file)}
     >
       {piece === null ? (

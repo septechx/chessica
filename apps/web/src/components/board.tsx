@@ -1,8 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import type { Move } from "@chessica/protocol";
 import { useChessWebSocket } from "@/hooks/use-chess-websocket";
-import { GameStatus } from "./game-status";
-import { ChessBoard } from "./chess-board";
+import { useUserId } from "@/hooks/use-userid";
 import {
   createInitialBoard,
   arrayToBoard,
@@ -10,12 +8,20 @@ import {
   calculateMoves,
   type BoardMap,
 } from "@/lib/board-utils";
-import { switch_color } from "@/lib/favicon-switcher";
+import { switchColor } from "@/lib/favicon-switcher";
+import { useSearchParams } from "@/router";
+import { GameStatus } from "./game-status";
+import { ChessBoard } from "./chess-board";
+import type { Move } from "@chessica/protocol";
 
 function Board() {
   const [isMoving, setIsMoving] = useState<number>(-1);
   const [, setStep] = useState<number>(0);
+
   const board = useRef<BoardMap>(createInitialBoard("White")).current;
+
+  const searchParams = useSearchParams();
+  const gameId = searchParams.get("gameId")!;
 
   const {
     connected,
@@ -25,11 +31,11 @@ function Board() {
     connectedCount,
     gameState,
     sendMove,
-  } = useChessWebSocket();
+  } = useChessWebSocket(gameId);
 
   useEffect(() => {
     if (assignedColor) {
-      switch_color(assignedColor);
+      switchColor(assignedColor);
     }
   }, [assignedColor]);
 

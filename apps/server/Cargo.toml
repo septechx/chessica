@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.8.4", features = ["ws"] }
+axum = { version = "0.8.4", features = ["ws", "json",  "macros"] }
 futures-util = "0.3.31"
 serde = { version = "1.0.219", features=["derive"] }
 tokio = { version = "1.45.1", features = ["full"] }
@@ -12,3 +12,4 @@ tokio-tungstenite = "0.27.0"
 chessica-protocol = { path = "../../packages/protocol/" }
 serde_json = "1.0.140"
 uuid = { version = "1.0", features = ["v4"] }
+tower-http = { version = "0.6.6", features = ["cors"] }

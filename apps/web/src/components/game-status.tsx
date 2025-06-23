@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { Color, GameState } from "@chessica/protocol";
 
 interface GameStatusProps {
@@ -20,7 +21,9 @@ export function GameStatus({
   return (
     <div className="mb-4 flex gap-4 items-center">
       <div
-        className={`px-3 py-1 rounded ${connected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+        className={cn("px-3 py-1 rounded bg-red-100 text-red-800", {
+          "bg-green-100 text-green-800": connected,
+        })}
       >
         {connected ? "Connected" : "Disconnected"}
       </div>

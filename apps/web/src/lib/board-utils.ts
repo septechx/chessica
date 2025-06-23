@@ -1,17 +1,14 @@
 import type { PieceType, Color, Piece } from "@chessica/protocol";
 
-// Extended piece type for UI dots
 export type UIPiece = Piece | { color: "dot"; piece: "dot" };
 export type BoardMap = Map<number, UIPiece | null>;
 
-// Convert between board representations - now using same coordinate system as server
 export function boardToArray(board: BoardMap): (Piece | null)[] {
   const array = new Array(64).fill(null);
   for (let rank = 0; rank < 8; rank++) {
     for (let file = 0; file < 8; file++) {
       const index = rank * 8 + file;
       const piece = board.get(index);
-      // Only include actual pieces, not dots
       if (piece && piece.color !== "dot") {
         array[index] = piece as Piece;
       }
@@ -31,14 +28,12 @@ export function arrayToBoard(array: (Piece | null)[]): BoardMap {
   return board;
 }
 
-// Convert coordinates based on player perspective
 export function getBoardIndex(
   rank: number,
   file: number,
   playerColor: Color,
 ): number {
   if (playerColor === "Black") {
-    // Flip the board for Black player
     return (7 - rank) * 8 + (7 - file);
   }
   return rank * 8 + file;
@@ -49,7 +44,6 @@ export function getRankFile(
   playerColor: Color,
 ): [number, number] {
   if (playerColor === "Black") {
-    // Flip the coordinates for Black player
     const rank = 7 - Math.floor(index / 8);
     const file = 7 - (index % 8);
     return [rank, file];
@@ -96,19 +90,16 @@ export function createInitialBoard(playerColor: Color): BoardMap {
     blackRows = [7, 6];
   }
 
-  // Place white pieces
   for (let col = 0; col < 8; col++) {
     board.set(whiteRows[0] * 8 + col, { color: "White", piece: backRank[col] });
     board.set(whiteRows[1] * 8 + col, { color: "White", piece: "Pawn" });
   }
 
-  // Place black pieces
   for (let col = 0; col < 8; col++) {
     board.set(blackRows[1] * 8 + col, { color: "Black", piece: "Pawn" });
     board.set(blackRows[0] * 8 + col, { color: "Black", piece: backRank[col] });
   }
 
-  // Fill empty squares
   const emptyRows = Array.from({ length: 8 }, (_, i) => i).filter(
     (row) => !whiteRows.includes(row) && !blackRows.includes(row),
   );
@@ -123,13 +114,12 @@ export function createInitialBoard(playerColor: Color): BoardMap {
 
 export function fetchPiece(piece: UIPiece): string {
   if (piece.color === "dot") {
-    return `http://localhost:5173/dot.svg`;
+    return `/dot.svg`;
   }
 
-  // Convert PascalCase to lowercase for file names
   const color = piece.color.toLowerCase();
   const pieceType = piece.piece.toLowerCase();
-  return `http://localhost:5173/${color}_${pieceType}.svg`;
+  return `/${color}_${pieceType}.svg`;
 }
 
 export function clearDots(board: BoardMap): void {
@@ -140,7 +130,6 @@ export function clearDots(board: BoardMap): void {
   });
 }
 
-// Piece movement logic
 export function calculateMoves(
   board: BoardMap,
   x: number,
@@ -180,13 +169,11 @@ function calculatePawnMoves(
   assignedColor: Color,
 ): void {
   if (assignedColor === "White") {
-    // Check if 1 square ahead is blocked
     if (board.get((calcX - 1) * 8 + calcY) !== null) {
       return;
     }
-    // If on starting rank, also check 2 squares ahead
     if (calcX === 6 && board.get((calcX - 2) * 8 + calcY) !== null) {
-      // Can only move 1 square
+      // Can only move 1 square (blocked)
       board.set((calcX - 1) * 8 + calcY, { piece: "dot", color: "dot" });
     } else if (calcX === 6) {
       // Can move both 1 and 2 squares
@@ -197,14 +184,11 @@ function calculatePawnMoves(
       board.set((calcX - 1) * 8 + calcY, { piece: "dot", color: "dot" });
     }
   } else {
-    // Black pawn moves down (increasing rank)
-    // Check if 1 square ahead is blocked
     if (board.get((calcX + 1) * 8 + calcY) !== null) {
       return;
     }
-    // If on starting rank, also check 2 squares ahead
     if (calcX === 1 && board.get((calcX + 2) * 8 + calcY) !== null) {
-      // Can only move 1 square
+      // Can only move 1 square (blocked)
       board.set((calcX + 1) * 8 + calcY, { piece: "dot", color: "dot" });
     } else if (calcX === 1) {
       // Can move both 1 and 2 squares

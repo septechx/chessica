@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum PieceType {
     Rook,
@@ -39,8 +41,9 @@ pub struct GameState {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "type")]
 pub enum ClientMessage {
+    Identify { id: Uuid },
     MakeMove { move_: Move },
-    JoinGame { game_id: String },
+    JoinGame { game_id: Uuid },
     Resign,
 }
 
@@ -53,4 +56,15 @@ pub enum ServerMessage {
     ColorAssigned { color: Color },
     GameStarted,
     WaitingForPlayers { connected_count: u8 },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct NewGameBody {
+    pub color: Color,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct NewGameResponse {
+    #[serde(rename = "gameId")]
+    pub game_id: Uuid,
 }

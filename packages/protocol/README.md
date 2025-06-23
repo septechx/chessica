@@ -17,3 +17,5 @@ This package provides shared types and structures for the chess websocket protoc
 - `GameState`: Represents the board, turn, and move history.
 - `Move`: Represents a chess move (from, to, optional promotion).
 - `ClientMessage`/`ServerMessage`: Websocket messages for game actions and state updates.
+- `NewGameBody`: Body required to send a PUT request to /api/game to create a new game.
+- `NewGameResponse`: Response from sending a PUT request to /api/game to create a new game.
