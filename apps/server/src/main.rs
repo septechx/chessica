@@ -44,7 +44,6 @@ impl GameRoom {
             Color::Black
         };
 
-        // Create a new client with the assigned color
         let mut client_with_color = client;
         client_with_color.color = Some(color);
 
@@ -114,7 +113,6 @@ impl GameRoom {
     }
 
     fn handle_move(&mut self, client_id: &ClientId, move_: &Move) -> Option<(Move, GameState)> {
-        // Check if game is started and it's the client's turn
         if let Some(ref mut game_state) = self.game_state {
             if let Some(client) = self.clients.iter().find(|c| c.id == *client_id) {
                 if let Some(client_color) = client.color {
@@ -187,13 +185,11 @@ fn handle_move(game_room: &SharedGameRoom, client_id: &ClientId, move_: &Move) {
 fn create_initial_board() -> Vec<Option<Piece>> {
     let mut board = vec![None; 64];
 
-    // Helper function to set a piece at a given position
     let set_piece = |board: &mut Vec<Option<Piece>>, rank: u8, file: u8, piece: Piece| {
         let index = (rank * 8 + file) as usize;
         board[index] = Some(piece);
     };
 
-    // Place white pieces (bottom rank)
     set_piece(
         &mut board,
         6,
@@ -339,8 +335,6 @@ fn create_initial_board() -> Vec<Option<Piece>> {
             piece: PieceType::Rook,
         },
     );
-
-    // Place black pieces (top rank)
     set_piece(
         &mut board,
         1,
@@ -413,7 +407,6 @@ fn create_initial_board() -> Vec<Option<Piece>> {
             piece: PieceType::Pawn,
         },
     );
-
     set_piece(
         &mut board,
         0,
@@ -503,7 +496,6 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
 
     let client_id = Uuid::new_v4().to_string();
 
-    // Spawn task to forward messages from channel to websocket
     let mut send_task = tokio::spawn(async move {
         while let Some(message) = rx.recv().await {
             if sender.send(message).await.is_err() {
@@ -512,7 +504,6 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
         }
     });
 
-    // Add client to game room and get assigned color
     let assigned_color = {
         let mut room = game_room.lock().unwrap();
         let client = Client {
@@ -523,7 +514,6 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
         room.add_client(client)
     };
 
-    // Send color assignment to the client
     {
         let room = game_room.lock().unwrap();
         let color_msg = ServerMessage::ColorAssigned {
@@ -532,7 +522,6 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
         room.send_to_client(&client_id, &color_msg);
     }
 
-    // Send waiting status to all clients
     {
         let room = game_room.lock().unwrap();
         let waiting_msg = ServerMessage::WaitingForPlayers {
@@ -541,10 +530,8 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
         room.broadcast(&waiting_msg);
     }
 
-    // Check if we can start the game and start it if possible
     start_game_if_possible(&game_room);
 
-    // Handle incoming messages
     while let Some(msg_result) = receiver.next().await {
         let msg = match msg_result {
             Ok(Message::Text(txt)) => txt,
@@ -555,9 +542,7 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
             Ok(ClientMessage::MakeMove { move_ }) => {
                 handle_move(&game_room, &client_id, &move_);
             }
-            Ok(ClientMessage::JoinGame { .. }) => {
-                // Client is already joined, no action needed
-            }
+            Ok(ClientMessage::JoinGame { .. }) => {}
             Ok(ClientMessage::Resign) => {
                 let err = ServerMessage::Error {
                     message: "Resign not implemented".into(),
@@ -575,12 +560,10 @@ async fn handle_socket(socket: WebSocket, game_room: SharedGameRoom) {
         }
     }
 
-    // Clean up when client disconnects
     {
         let mut room = game_room.lock().unwrap();
         room.remove_client(&client_id);
 
-        // Notify remaining clients about the disconnection
         let waiting_msg = ServerMessage::WaitingForPlayers {
             connected_count: room.get_client_count(),
         };
