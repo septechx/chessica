@@ -36,6 +36,13 @@ pub struct GameState {
     pub board: Vec<Option<Piece>>,
     pub turn: Color,
     pub move_history: Vec<Move>,
+    pub taken_pieces: TakenPieces,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct TakenPieces {
+    white: Vec<Piece>,
+    black: Vec<Piece>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -44,6 +51,7 @@ pub enum ClientMessage {
     Identify { id: Uuid },
     MakeMove { move_: Move },
     JoinGame { game_id: Uuid },
+    TakePiece { from: Square, to: Square },
     Resign,
 }
 
